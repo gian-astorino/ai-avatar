@@ -17,7 +17,7 @@ Tutti gli stati sono convertiti 1:1 da `avatar-animazioni.html`, che resta il ri
 Da GitHub (repo privato, serve l'accesso):
 
 ```bash
-npm i github:ORG/ai-avatar#v0.2.0
+npm i github:gian-astorino/ai-avatar#v0.2.0
 ```
 
 Oppure copia `dist/ai-avatar.js` nel progetto: è un unico file senza dipendenze.
