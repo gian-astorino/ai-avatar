@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Avatar Engine Playground</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a stage (avatar + reference) on the left, a control rail on the right; stacks on phones. */
+:root{
+  --bg:#f3f4f2; --panel:#ffffff; --ink:#1b1e1c; --muted:#69706b; --line:#dde0dc;
+  --accent:#1f6f5c; --accent-soft:#e2efe9; --stage:#e9ebe8;
+  --sans:"Geist",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#141715; --panel:#1b1f1d; --ink:#e7ebe8; --muted:#97a09a; --line:#2c322f;
+  --accent:#6cc7ad; --accent-soft:#1f3a32; --stage:#101311; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141715; --panel:#1b1f1d; --ink:#e7ebe8; --muted:#97a09a; --line:#2c322f;
+  --accent:#6cc7ad; --accent-soft:#1f3a32; --stage:#101311; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--sans)}
+.wrap{max-width:1120px;margin:0 auto;padding-inline:20px;padding-block:28px 48px;display:grid;gap:20px}
+header{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 20px}
+h1{font-size:22px;font-weight:600;letter-spacing:-.01em;margin:0;text-wrap:balance}
+.sub{color:var(--muted);margin:0;max-width:62ch}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:20px;align-items:start}
+@media (max-width:860px){.grid{grid-template-columns:minmax(0,1fr)}}
+@media (min-width:861px){.stage{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px)}}
+.stage{background:var(--stage);border-radius:14px;padding:20px;display:grid;gap:16px}
+.faces{display:flex;flex-wrap:wrap;justify-content:center;gap:28px}
+.face{display:grid;justify-items:center;gap:8px}
+.face .box{width:min(240px,62vw);aspect-ratio:1;max-width:100%;display:grid;place-items:center;color:var(--ink)}
+.face .box svg{width:100%;height:100%}
+.tag{font:500 11px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.readout{display:flex;flex-wrap:wrap;gap:8px 20px;justify-content:center;font:13px var(--mono);color:var(--muted);font-variant-numeric:tabular-nums}
+.readout b{color:var(--ink);font-weight:500}
+.bar{height:4px;background:var(--line);border-radius:2px;overflow:hidden;width:120px;align-self:center}
+.bar i{display:block;height:100%;background:var(--accent);width:100%}
+.sizes{display:flex;align-items:end;justify-content:center;gap:22px;color:var(--ink)}
+.sizes div{display:grid;justify-items:center;gap:6px}
+.rail{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;display:grid;gap:20px}
+.group{display:grid;gap:10px}
+.group h2{margin:0;font:500 11px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.states{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+.sgroup{display:grid;gap:8px}.sgroup h3{margin:4px 0 0;font:500 11px/1 var(--mono);color:var(--muted)}
+button{font:inherit;color:inherit;cursor:pointer}
+.st{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 12px;border:1px solid var(--line);border-radius:9px;background:var(--panel);text-align:left}
+.st small{font:11px var(--mono);color:var(--muted);white-space:nowrap}
+.st:hover{border-color:var(--muted)}
+.st[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.st:focus-visible,.btn:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.row{display:grid;grid-template-columns:110px minmax(0,1fr) 64px;align-items:center;gap:10px;font-size:14px}
+.row output{font:13px var(--mono);text-align:right;font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+.btn{padding:8px 12px;border-radius:9px;border:1px solid var(--line);background:var(--panel)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--panel)}
+.check{display:flex;gap:8px;align-items:center;font-size:14px}
+.check input{accent-color:var(--accent);width:16px;height:16px}
+pre{margin:0;background:var(--stage);border-radius:9px;padding:12px;font:12.5px/1.6 var(--mono);overflow-x:auto;white-space:pre}
+.log{font:12.5px/1.7 var(--mono);color:var(--muted);max-height:160px;overflow:auto}
+.log b{color:var(--ink);font-weight:500}
+.note{font-size:13px;color:var(--muted);margin:0}
+@media (prefers-reduced-motion: reduce){.bar i{transition:none}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Avatar Engine Playground</h1>
+      <p class="sub">Il motore disegna la faccia in tempo reale e passa da uno stato all'altro senza scatti. Tutte le 22 animazioni, convertite 1:1 dall'HTML di riferimento. Scegli uno stato anche a metà animazione per vedere la transizione.</p>
+    </div>
+  </header>
+
+  <div class="grid">
+    <section class="stage" aria-label="Anteprima">
+      <div class="faces">
+        <div class="face"><div class="box" id="main"></div><span class="tag">Motore</span></div>
+        <div class="face" id="refWrap" hidden><div class="box" id="ref"></div><span class="tag">Riferimento (HTML attuale)</span></div>
+      </div>
+      <div class="readout" aria-live="polite">
+        <span>stato <b id="rState">idle</b></span>
+        <span>tempo <b id="rTime">0.00</b> / <span id="rDur">8.00</span> s</span>
+        <span style="display:flex;gap:8px">transizione <span class="bar"><i id="rBlend"></i></span></span>
+      </div>
+      <div class="sizes" aria-label="Taglie">
+        <div><span id="s24"></span><span class="tag">24</span></div>
+        <div><span id="s32"></span><span class="tag">32</span></div>
+        <div><span id="s48"></span><span class="tag">48</span></div>
+        <div><span id="s64"></span><span class="tag">64</span></div>
+      </div>
+    </section>
+
+    <aside class="rail">
+      <div class="group">
+        <h2>Stati</h2>
+        <div id="states" class="sgroup"></div>
+        <p class="note">Loop: restano finché non cambi. One-shot: finiscono e tornano allo stato di prima. Interattivo: segue il puntatore.</p>
+      </div>
+
+      <div class="group">
+        <h2>Transizione e velocità</h2>
+        <div class="row"><label for="tr">Transizione</label><input id="tr" type="range" min="0" max="1200" step="50" value="350"><output id="trv">350 ms</output></div>
+        <div class="row"><label for="sp">Velocità</label><input id="sp" type="range" min="0.25" max="2" step="0.25" value="1"><output id="spv">1×</output></div>
+      </div>
+
+      <div class="group">
+        <h2>Prova</h2>
+        <div class="btns">
+          <button class="btn primary" id="demo">Flusso chat</button>
+          <button class="btn" id="rnd">Cambio a caso</button>
+          <button class="btn" id="pause">Pausa</button>
+        </div>
+        <label class="check"><input type="checkbox" id="via"> Passa sempre dalla faccia neutra</label>
+        <label class="check"><input type="checkbox" id="cmp"> Confronta con il riferimento</label>
+      </div>
+
+      <div class="group">
+        <h2>Codice</h2>
+        <pre id="code">av.set('idle')</pre>
+      </div>
+
+      <div class="group">
+        <h2>Registro</h2>
+        <div class="log" id="log"></div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+
+
+<script type="module">
+import { createAvatar, stateInfo, states } from '../src/index.js'
+import { CARDS } from '../test/cards.js'
+// SVG di riferimento presi dall'HTML attuale (per il confronto)
+{
+  const html = await (await fetch('../reference/avatar-animazioni.html')).text()
+  for (const [name, [marker]] of Object.entries(CARDS)) {
+    const a = html.indexOf(`<!-- ${marker} -->`), i = html.indexOf('<svg', a), j = html.indexOf('</svg>', i) + 6
+    const t = document.createElement('template'); t.id = 'ref-' + name; t.innerHTML = html.slice(i, j); document.body.appendChild(t)
+  }
+}
+
+const ORDER = states()
+const $ = id => document.getElementById(id)
+
+const av = createAvatar($('main'), { state: 'idle', size: 240 })
+const minis = [24, 32, 48, 64].map(s => createAvatar($('s' + s), { state: 'idle', size: s }))
+const all = [av, ...minis]
+let opt = { transition: 350 }
+
+function log(html) {
+  const t = new Date().toLocaleTimeString('it-IT', { hour12: false })
+  $('log').insertAdjacentHTML('afterbegin', `<div>${t} · ${html}</div>`)
+}
+function code(name) {
+  const info = stateInfo(name), o = `{ transition: ${opt.transition}${opt.via ? ", via: 'neutral'" : ''} }`
+  $('code').textContent = info.loop
+    ? `av.set('${name}', ${o})`
+    : `av.play('${name}', ${o})\n// alla fine torna allo stato di prima`
+}
+function go(name) {
+  const info = stateInfo(name), prev = av.state
+  for (const a of all) info.loop ? a.set(name, { ...opt }) : a.play(name, { ...opt })
+  code(name)
+  log(`<b>${prev}</b> → <b>${name}</b> (${opt.transition} ms${opt.via ? ', via neutra' : ''})${info.interactive ? ' · muovi il puntatore' : ''}`)
+  showRef(name)
+}
+
+// pulsanti stato, divisi per tipo
+const groups = [['Loop', n => stateInfo(n).loop && !stateInfo(n).interactive], ['One-shot', n => !stateInfo(n).loop], ['Interattivo', n => stateInfo(n).interactive]]
+for (const [title, test] of groups) {
+  const h = document.createElement('h3'); h.textContent = title; $('states').appendChild(h)
+  const box = document.createElement('div'); box.className = 'states'; $('states').appendChild(box)
+  for (const name of ORDER.filter(test)) {
+    const info = stateInfo(name), b = document.createElement('button')
+    b.className = 'st'; b.id = 'st-' + name; b.type = 'button'
+    b.innerHTML = `<span>${info.label}</span><small>${info.interactive ? 'live' : +info.duration.toFixed(1) + ' s'}</small>`
+    b.addEventListener('click', () => go(name))
+    box.appendChild(b)
+  }
+}
+av.on('state', s => ORDER.forEach(n => $('st-' + n).setAttribute('aria-pressed', String(n === s))))
+av.on('end', s => { log(`<b>${s}</b> finito, torna a <b>${av.state}</b>`); code(av.state); showRef(av.state) })
+$('st-idle').setAttribute('aria-pressed', 'true')
+
+// slider
+$('tr').addEventListener('input', e => { opt.transition = +e.target.value; $('trv').textContent = opt.transition + ' ms'; code(av.state) })
+$('via').addEventListener('change', e => { opt.via = e.target.checked ? 'neutral' : undefined; code(av.state) })
+$('sp').addEventListener('input', e => { const v = +e.target.value; all.forEach(a => (a.speed = v)); $('spv').textContent = v + '×' })
+
+// pausa
+let paused = false
+$('pause').addEventListener('click', () => {
+  paused = !paused; all.forEach(a => (paused ? a.pause() : a.resume()))
+  $('pause').textContent = paused ? 'Riprendi' : 'Pausa'
+  const r = $('ref').querySelector('svg'); r && (paused ? r.pauseAnimations() : r.unpauseAnimations())
+})
+
+// riferimento: l'SVG dell'HTML attuale, fatto ripartire quando cambia stato
+function showRef(name) {
+  if (!$('cmp').checked) return
+  $('ref').replaceChildren($('ref-' + name).content.cloneNode(true))
+  const svg = $('ref').querySelector('svg'), info = stateInfo(name)
+  const T = Math.max(0, info.loop ? av.time % info.duration : Math.min(av.time, info.duration))
+  svg.setCurrentTime(T); svg.getAnimations({ subtree: true }).forEach(a => { a.currentTime = T * 1000 })
+  if (paused) svg.pauseAnimations()
+}
+$('cmp').addEventListener('change', e => { $('refWrap').hidden = !e.target.checked; showRef(av.state) })
+
+// demo: un giro di conversazione
+let demoTimer = []
+$('demo').addEventListener('click', () => {
+  demoTimer.forEach(clearTimeout); demoTimer = []
+  const steps = [['entrata', 0], ['listening', 2200], ['thinking', 5000], ['loading-loop', 8600], ['speaking', 11000], ['happy', 15200], ['idle', 18600]]
+  steps.forEach(([s, at]) => demoTimer.push(setTimeout(() => go(s), at)))
+  log('flusso chat: entra → ascolta → pensa → carica → risponde → contento')
+})
+$('rnd').addEventListener('click', () => {
+  const others = ORDER.filter(n => n !== av.state && !stateInfo(n).interactive)
+  go(others[Math.floor(Math.random() * others.length)])
+})
+
+// readout
+function tick() {
+  const info = stateInfo(av.state), t = av.time
+  $('rState').textContent = av.state
+  $('rTime').textContent = Math.max(0, info.loop ? t % info.duration : Math.min(t, info.duration)).toFixed(2)
+  $('rDur').textContent = info.duration.toFixed(2)
+  $('rBlend').style.width = (av.blend * 100).toFixed(0) + '%'
+  requestAnimationFrame(tick)
+}
+tick()
+log('pronto: <b>idle</b>')
+</script>
+
+</body>
+</html>
