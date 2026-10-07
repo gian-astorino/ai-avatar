@@ -137,7 +137,7 @@ pre{margin:0;background:var(--stage);border-radius:9px;padding:12px;font:12.5px/
 
 <script type="module">
 import { createAvatar, stateInfo, states } from '../src/index.js'
-import { CARDS } from '../test/cards.js'
+import { CARDS, REF_SPEED } from '../test/cards.js'
 // SVG di riferimento presi dall'HTML attuale (per il confronto)
 {
   const html = await (await fetch('../reference/avatar-animazioni.html')).text()
@@ -209,7 +209,8 @@ function showRef(name) {
   $('ref').replaceChildren($('ref-' + name).content.cloneNode(true))
   const svg = $('ref').querySelector('svg'), info = stateInfo(name)
   const T = Math.max(0, info.loop ? av.time % info.duration : Math.min(av.time, info.duration))
-  svg.setCurrentTime(T); svg.getAnimations({ subtree: true }).forEach(a => { a.currentTime = T * 1000 })
+  const k = REF_SPEED[name] ?? 1   // riferimento accelerato come il motore
+  svg.setCurrentTime(T * k); svg.getAnimations({ subtree: true }).forEach(a => { a.playbackRate = k; a.currentTime = T * k * 1000 })
   if (paused) svg.pauseAnimations()
 }
 $('cmp').addEventListener('change', e => { $('refWrap').hidden = !e.target.checked; showRef(av.state) })

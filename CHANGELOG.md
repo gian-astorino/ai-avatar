@@ -5,6 +5,7 @@
 - Transizioni: diretta, via faccia neutra (automatica per pong, loading, loading-loop, cool, centrifuga; forzabile con `{ via: 'neutral' }`), uscita propria dello stato (la graffetta di `clip` si srotola prima di passare oltre).
 - Accessori (occhiali, note, gocce, fiore, barre) che sfumano con la transizione.
 - Stato interattivo `follow` (segue il puntatore).
+- `entrata` 2× più veloce del riferimento (0,9 s invece di 1,7 s).
 - Web Component `<ai-avatar>`, export statico `toSVG()`.
 
 ## 0.1.0

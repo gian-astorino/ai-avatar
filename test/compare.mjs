@@ -6,7 +6,7 @@ import { readFile } from 'node:fs/promises'
 import { join, dirname, extname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { chromium } from 'playwright'
-import { CARDS } from './cards.js'
+import { CARDS, REF_SPEED } from './cards.js'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const LIMIT = 1.5      // % massima di pixel diversi (sui pixel di tratto) per considerare uno stato fedele
@@ -43,11 +43,11 @@ for (const [name, [, N]] of Object.entries(CARDS)) {
   const vals = []
   for (let i = 0; i < 12; i++) {
     const T = N ? Math.round(N * i / 12) * D / N + 1e-4 : name === 'entrata' ? 1.75 * i / 12 : 0
-    await page.evaluate(([n, T]) => {
+    await page.evaluate(([n, T, k]) => {
       const s = document.querySelector(`#r-${n} svg`); s.setCurrentTime(T)
       s.getAnimations({ subtree: true }).forEach(a => { a.currentTime = T * 1000 })
-      eng[n].renderAt(n, T)
-    }, [name, T])
+      eng[n].renderAt(n, T / k)
+    }, [name, T, REF_SPEED[name] ?? 1])
     const a = await page.locator(`#r-${name} svg`).screenshot(), b = await page.locator(`#e-${name} svg`).screenshot()
     vals.push(await diff(a, b))
   }

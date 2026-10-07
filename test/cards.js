@@ -7,3 +7,5 @@ export const CARDS = {
   centrifuga: ['17. SPIN', 300], errore: ['18. ERROR', 400], cool: ['22. COOL', 240], 'empty-state': ['23. EMPTY', 475],
   clip: ['24. CLIP', 360], clicca: ['25. CLICCA', 330], follow: ['8. FOLLOW CURSOR', 0],
 }
+// stati che il motore esegue più veloci del riferimento: il confronto usa il riferimento accelerato di questo fattore
+export const REF_SPEED = { entrata: 2 }

@@ -8,6 +8,6 @@ const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '
 const port = +process.env.PORT || 5173
 createServer(async (req, res) => {
   let p = decodeURIComponent(req.url.split('?')[0]); if (p.endsWith('/')) p += 'index.html'
-  try { res.writeHead(200, { 'content-type': types[extname(p)] || 'application/octet-stream' }); res.end(await readFile(join(root, p))) }
+  try { const body = await readFile(join(root, p)); res.writeHead(200, { 'content-type': types[extname(p)] || 'application/octet-stream' }); res.end(body) }
   catch { res.writeHead(404); res.end('Non trovato') }
 }).listen(port, () => console.log(`Playground: http://localhost:${port}/playground/`))

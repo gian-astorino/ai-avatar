@@ -177,9 +177,9 @@ function thinkFace(T, D, v) {
   })
 }
 
-/* ENTRATA — i tratti si disegnano uno dopo l'altro (one-shot, poi idle) */
+/* ENTRATA — i tratti si disegnano uno dopo l'altro (one-shot, poi idle); 2× più veloce del riferimento (4.2 s) */
 {
-  const D = 4.2, IN = cb(.4, 0, .2, 1)
+  const D = 4.2 / 2, IN = cb(.4, 0, .2, 1)
   const feats = { el: [[[5, 5], [5, 7]], .0476, .10], er: [[[11, 5], [11, 7]], .1310, .1833], no: [[[8, 3], [8, 9]], .2143, .2810], mo: [chain(SMILE, 40), .3095, .3952] }
   defineState('entrata', {
     label: 'Entrata', duration: D * .3952 + .05, loop: false,
