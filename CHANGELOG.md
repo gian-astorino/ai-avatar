@@ -1,6 +1,6 @@
 # Changelog
 
-## Non rilasciato
+## 0.3.0
 - `imagining`: tolto il fiore che sbocciava dietro la testa.
 - Nuovo stato loop `regista` (7,5 s): video maker serio con basco, occhiali da sole squadrati e bocca piatta. Studia l'inquadratura a sinistra e a destra, abbassa piano gli occhiali scoprendo gli occhi, li rialza e chiude con un cenno. Riferimento in `reference/avatar-regista.svg`, verificato pixel per pixel; passa dalla faccia neutra come `cool`.
 

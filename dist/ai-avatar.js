@@ -1,4 +1,4 @@
-/*! ai-avatar v0.2.0 */
+/*! ai-avatar v0.3.0 */
 // ---- src/core.js ----
 /*
  * ai-avatar · core
