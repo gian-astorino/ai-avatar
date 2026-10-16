@@ -73,7 +73,7 @@ pre{margin:0;background:var(--stage);border-radius:9px;padding:12px;font:12.5px/
   <header>
     <div>
       <h1>Avatar Engine Playground</h1>
-      <p class="sub">Il motore disegna la faccia in tempo reale e passa da uno stato all'altro senza scatti. Tutte le 22 animazioni, convertite 1:1 dall'HTML di riferimento. Scegli uno stato anche a metà animazione per vedere la transizione.</p>
+      <p class="sub">Il motore disegna la faccia in tempo reale e passa da uno stato all'altro senza scatti. Tutte le 23 animazioni, convertite 1:1 dai riferimenti. Scegli uno stato anche a metà animazione per vedere la transizione.</p>
     </div>
   </header>
 
@@ -137,13 +137,12 @@ pre{margin:0;background:var(--stage);border-radius:9px;padding:12px;font:12.5px/
 
 <script type="module">
 import { createAvatar, stateInfo, states } from '../src/index.js'
-import { CARDS, REF_SPEED } from '../test/cards.js'
+import { CARDS, REF_SPEED, refSVG } from '../test/cards.js'
 // SVG di riferimento presi dall'HTML attuale (per il confronto)
 {
   const html = await (await fetch('../reference/avatar-animazioni.html')).text()
   for (const [name, [marker]] of Object.entries(CARDS)) {
-    const a = html.indexOf(`<!-- ${marker} -->`), i = html.indexOf('<svg', a), j = html.indexOf('</svg>', i) + 6
-    const t = document.createElement('template'); t.id = 'ref-' + name; t.innerHTML = html.slice(i, j); document.body.appendChild(t)
+    const t = document.createElement('template'); t.id = 'ref-' + name; t.innerHTML = await refSVG(marker, html); document.body.appendChild(t)
   }
 }
 

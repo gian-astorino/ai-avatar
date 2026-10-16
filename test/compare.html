@@ -3,13 +3,13 @@
 <div id="rows"></div>
 <script type="module">
 import { createAvatar } from '../src/index.js'
-import { CARDS } from './cards.js'
+import { CARDS, refSVG } from './cards.js'
 const html = await (await fetch('../reference/avatar-animazioni.html')).text()
 window.eng = {}
 for (const [name, [marker]] of Object.entries(CARDS)) {
-  const a = html.indexOf(`<!-- ${marker} -->`), i = html.indexOf('<svg', a), j = html.indexOf('</svg>', i) + 6
+  const svg = await refSVG(marker, html)
   const row = document.createElement('div'); row.className = 'row'
-  row.innerHTML = `<div class="cell" id="r-${name}">${html.slice(i, j).replace('<svg ', '<svg width="256" height="256" ')}</div><div class="cell" id="e-${name}"></div>`
+  row.innerHTML = `<div class="cell" id="r-${name}">${svg.replace('<svg ', '<svg width="256" height="256" ')}</div><div class="cell" id="e-${name}"></div>`
   document.getElementById('rows').appendChild(row)
   eng[name] = createAvatar(document.getElementById('e-' + name), { state: name, size: 256 }).pause()
 }

@@ -1,7 +1,7 @@
 {
   "name": "ai-avatar",
   "version": "0.2.0",
-  "description": "Motore di animazione dell'avatar AI: 22 stati, transizioni morbide, Web Component. Nessuna dipendenza.",
+  "description": "Motore di animazione dell'avatar AI: 23 stati, transizioni morbide, Web Component. Nessuna dipendenza.",
   "type": "module",
   "main": "dist/ai-avatar.js",
   "module": "dist/ai-avatar.js",

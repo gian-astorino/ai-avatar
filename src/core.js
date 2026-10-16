@@ -126,7 +126,7 @@ export const polyMouth = pts => pts.concat(pts.slice(0, -1).reverse())
 export const shapeMouth = (ctrl, per = 16) => chain(ctrl, per)
 
 /* ------------------------------------------------------------------ */
-/* Nodi SVG extra (accessori, maschere, note, gocce, fiore…)            */
+/* Nodi SVG extra (accessori, maschere, note, gocce…)            */
 /*   n(tag, attrs, children) — attrs.k = chiave stabile opzionale       */
 /* ------------------------------------------------------------------ */
 

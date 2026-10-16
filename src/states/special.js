@@ -1,4 +1,4 @@
-/* ai-avatar · stati speciali: cool, empty-state, clip, clicca, follow */
+/* ai-avatar · stati speciali: cool, regista, empty-state, clip, clicca, follow */
 import {
   R, NOSE_OUT, cb, IO, SYM, LIN, cl, track, kf, blinkf, proj, zOf, eye, lerpPts, bez, resample, plen,
   lineMouth, polyMouth, cubicD, polyD, defineState, n,
@@ -44,6 +44,58 @@ const RAD = Math.PI / 180
         over: [n('g', { k: 'glasses', mask: 'url(#cool-glint)', stroke: 'currentColor', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [
           n('path', { d: ll, fill: 'currentColor', 'stroke-width': 1 }), n('path', { d: lr, fill: 'currentColor', 'stroke-width': 1 }),
           n('path', { d: br, 'stroke-width': 1.5, fill: 'none' }),
+        ])],
+      }
+    },
+  })
+}
+
+/* REGISTA — video maker serio: basco, occhiali da sole squadrati, bocca piatta.
+   Studia l'inquadratura a sinistra e a destra, inclina la testa e chiude con un cenno secco.
+   Ricavato da reference/avatar-regista.svg: forme fisse sulla testa 3D + posa della testa campionata. */
+{
+  const D = 7.5
+  const LENS_L = [[3.871, 5.727, -0.698], [7.555, 5.557, -0.095], [7.624, 6.588, 0.112], [6.962, 8.448, 0.312], [5.663, 8.497, 0.239], [4.449, 8.556, 0.073], [3.927, 7.832, -0.127], [3.898, 6.752, -0.337]],
+    LENS_R = [[11.755, 5.508, -0.836], [8.058, 5.543, -0.102], [8.043, 6.577, 0.107], [8.807, 8.397, 0.288], [10.108, 8.374, 0.178], [11.326, 8.365, -0.031], [11.81, 7.613, -0.252], [11.781, 6.533, -0.466]],
+    BRIDGE = [[7.232, 6.062, 0.012], [8.407, 6.029, -0.004]], NUB = [[8.07, 0.908, 0.625], [8.201, 0.485, 0.608]], NOSE = [[7.77, 4.122, -0.609], [7.899, 9.055, 1.44]],
+    EYE_L = [[5.298, 5.849, -0.21], [5.342, 7.506, 0.108]], EYE_R = [[10.33, 5.709, -0.284], [10.374, 7.366, 0.038]],
+    BERET = [[4.582, 3.955, -1.734], [6.595, 4.121, -0.684], [8.943, 4.015, -0.745], [10.785, 3.696, -1.818], [12.132, 3.651, -2.84], [12.775, 2.625, 0.728], [11.576, 1.735, 0.683], [10.369, 0.593, 0.627], [6.341, 0.621, 0.601], [4.687, 1.506, 0.628], [3.531, 2.21, 0.65], [3.566, 3.469, -2.265], [4.582, 3.955, -1.734]],
+    MOUTH = [[6.72, 11.731, 0.3], [6.876, 11.706, 0.294], [7.033, 11.684, 0.289], [7.19, 11.665, 0.286], [7.347, 11.648, 0.282], [7.504, 11.634, 0.279], [7.661, 11.623, 0.276], [7.818, 11.614, 0.273], [7.975, 11.608, 0.27], [8.132, 11.605, 0.268], [8.29, 11.605, 0.266], [8.447, 11.608, 0.264], [8.605, 11.613, 0.262], [8.762, 11.621, 0.261], [8.92, 11.632, 0.259], [9.078, 11.645, 0.259], [9.236, 11.661, 0.259]]
+  // posa della testa ogni 3 fotogrammi (40 fps): yaw, pitch, roll(°), tx, ty × 10000
+  const Q = '23 -25 885 -197 133 41 -14 1440 -221 123 58 -3 1975 -244 114 73 8 2509 -263 102 87 18 3028 -281 93 99 27 3545 -299 84 108 36 4033 -309 76 115 44 4521 -322 67 117 50 4960 -324 62 94 56 5330 -298 56 5 63 5548 -205 51 -187 71 5500 3 43 -507 81 5123 353 38 -867 90 4597 749 30 -1158 95 4189 1075 27 -1372 97 3945 1313 25 -1531 96 3794 1494 26 -1649 93 3734 1630 27 -1738 88 3707 1731 32 -1804 82 3716 1809 37 -1851 74 3736 1865 46 -1881 65 3780 1904 54 -1898 54 3839 1924 63 -1906 43 3889 1932 74 -1911 32 3921 1938 84 -1913 21 3924 1943 94 -1912 9 3908 1941 103 -1907 -2 3870 1937 114 -1900 -13 3792 1935 123 -1890 -24 3704 1924 135 -1877 -35 3597 1909 144 -1862 -44 3466 1894 151 -1846 -52 3311 1877 157 -1829 -59 3134 1858 163 -1811 -65 2915 1839 169 -1795 -70 2676 1823 172 -1779 -72 2406 1808 173 -1765 -74 2114 1793 174 -1752 -75 1795 1781 174 -1709 -74 1546 1730 173 -1598 -73 1473 1601 172 -1410 -73 1562 1389 172 -1139 -73 1865 1077 175 -786 -75 2341 680 178 -365 -78 2929 211 182 96 -81 3547 -296 185 556 -85 4139 -807 186 971 -87 4593 -1271 187 1313 -87 4887 -1662 184 1568 -84 4968 -1955 179 1735 -78 4830 -2142 172 1823 -70 4528 -2244 166 1839 -59 4051 -2257 156 1824 -47 3521 -2238 148 1810 -36 2984 -2217 138 1798 -26 2457 -2196 132 1789 -17 1969 -2184 124 1784 -9 1483 -2173 119 1781 -2 1008 -2161 114 1782 4 589 -2165 109 1785 8 166 -2161 106 1792 11 -214 -2168 107 1803 12 -560 -2179 108 1767 13 -999 -2134 109 1580 18 -1758 -1915 105 1163 29 -2998 -1433 95 725 38 -4264 -937 86 444 41 -5152 -625 80 276 39 -5766 -437 80 178 34 -6192 -326 84 124 26 -6472 -268 90 102 18 -6687 -239 96 102 7 -6770 -243 106 110 -5 -6835 -253 119 114 -16 -6874 -256 128 115 -27 -6888 -254 138 114 -39 -6875 -257 152 108 -50 -6832 -251 160 100 -61 -6777 -239 171 89 -71 -6693 -228 179 76 -81 -6583 -214 188 67 183 -6475 -201 -55 62 604 -6315 -193 -415 48 709 -6117 -182 -502 31 705 -5891 -167 -499 12 627 -5648 -147 -436 -8 464 -5379 -128 -300 -28 241 -5061 -113 -107 -46 40 -4752 -90 73 -59 -78 -4387 -78 181 -66 -110 -4004 -76 213 -70 -106 -3595 -74 208 -70 -100 -3166 -75 205 -68 -93 -2709 -80 196 -61 -86 -2236 -91 189 -52 -77 -1742 -103 181 -40 -68 -1224 -121 175 -27 -58 -709 -137 164 -10 -47 -161 -161 153 6 -36 356 -179 144'.split(' ').map(v => v / 1e4)
+  const GLASSES_DROP = 1.25
+  const M = Q.length / 5, at =(i, p) => Q[((i % M) + M) % M * 5 + p]
+  const cr = (a, b, c, d, u) => .5 * (2 * b + (c - a) * u + (2 * a - 5 * b + 4 * c - d) * u * u + (3 * b - a - 3 * c + d) * u * u * u)
+  defineState('regista', {
+    label: 'Regista', duration: D, viaNeutral: true,
+    pose(t) {
+      // la testa resta ferma più a lungo (sbirciata) e il cenno parte dopo che gli occhiali sono risaliti
+      const tw = t < .68 ? t : t < .86 ? .68 + (t - .68) * .12 / .18 : .80 + (t - .86) * .2 / .14
+      const f = tw * M, i = Math.floor(f), u = f - i
+      const q = [0, 1, 2, 3, 4].map(p => cr(at(i - 1, p), at(i, p), at(i + 1, p), at(i + 2, p), u))
+      // sbirciata: gli occhiali scivolano piano giù sul naso e spuntano gli occhi, poi tornano su e solo dopo annuisce
+      const g = track(t, [[.655, .765, 0, 1, SYM], [.80, .845, 1, 0, IO]])
+      const P = (pts, dy = 0) => pts.map(([x, y, e]) => proj(x, y + dy, e, ...q))
+      const G = GLASSES_DROP * g, lens = pts => { const r = P(pts, G); return polyD(r.slice(0, 2)) + cubicD(r.slice(1)).replace(/^M[^C]*/, '') + 'Z' }
+      const ll = lens(LENS_L), lr = lens(LENS_R), br = polyD(P(BRIDGE, G)), bt = cubicD(P(BERET)) + 'Z'
+      const eo = g > .2 ? 1 : 0   // finché gli occhiali sono quasi su gli occhi restano nascosti
+      return {
+        // occhi dietro le lenti: si vedono solo quando gli occhiali sono abbassati (guardano un filo in su)
+        el: P(EYE_L, -.15 * g), er: P(EYE_R, -.15 * g), op: { el: eo, er: eo },
+        // il naso resta fermo: con gli occhiali abbassati spunta sopra il ponte
+        no: P(NOSE), at: { no: { mask: 'url(#regista-nose)' } },
+        mo: polyMouth(P(MOUTH)),
+        defs: [n('mask', { id: 'regista-nose', maskUnits: 'userSpaceOnUse', x: -2, y: -2, width: 20, height: 20 }, [
+          n('rect', { x: -2, y: -2, width: 20, height: 20, fill: 'white' }),
+          n('path', { d: ll, fill: 'black', stroke: 'none' }), n('path', { d: lr, fill: 'black', stroke: 'none' }),
+          n('path', { d: br, stroke: 'black', 'stroke-width': 1.5 }),
+          n('path', { d: bt, fill: 'black', stroke: 'black', 'stroke-width': 1.6 }),
+        ])],
+        over: [n('g', { k: 'regista', stroke: 'currentColor', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [
+          n('path', { d: ll, fill: 'currentColor', 'stroke-width': 1 }), n('path', { d: lr, fill: 'currentColor', 'stroke-width': 1 }),
+          n('path', { d: br, 'stroke-width': 1.5, fill: 'none' }),
+          n('path', { d: bt, fill: 'currentColor', 'stroke-width': .6 }),
+          n('path', { d: polyD(P(NUB)), 'stroke-width': 1, fill: 'none' }),
         ])],
       }
     },

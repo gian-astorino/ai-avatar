@@ -1,7 +1,7 @@
 /* ai-avatar · stati base: idle, thinking, speaking, listening, pong, happy, entrata, imagining, loading */
 import {
   NOSE_OUT, cb, IO, SYM, LIN, SMOOTH, cl, track, kf, blinkf, proj, eye, lerpPts, chain, partial,
-  SMILE, SMILE2, lineMouth, shapeMouth, polyMouth, defineState, n,
+  SMILE, SMILE2, lineMouth, shapeMouth, polyMouth, defineState,
 } from '../core.js'
 
 const face = (P, el, er, mo, extra = {}) => ({ el: el.map(q => P(...q)), er: er.map(q => P(...q)), no: [P(8, 3), P(8, 9, NOSE_OUT)], mo, ...extra })
@@ -196,29 +196,20 @@ function thinkFace(T, D, v) {
   })
 }
 
-/* IMAGINING — occhi chiusi, respiro, un fiore che sboccia e svanisce dietro la testa */
+/* IMAGINING — occhi chiusi, respiro */
 {
   const D = 5.5, w = 2 * Math.PI / D
   const cL = [[3.9, 6.3], [4.4, 6.6], [5.2, 6.6], [5.7, 6.3]], cR = [[10.3, 6.3], [10.8, 6.6], [11.6, 6.6], [12.1, 6.3]]
   const mr = [[6, 11.3], [7.1, 12.4], [8.9, 12.4], [10, 11.3]], mi = [[6.3, 11.2], [7.3, 12], [8.7, 12], [9.7, 11.2]]
-  const FLOWER = 'M11.9996 2C13.9375 2 15.5529 3.37834 15.9205 5.20801C17.689 4.61093 19.6916 5.3214 20.6607 7C21.6296 8.6784 21.2433 10.7669 19.8423 12C21.2433 13.2331 21.6296 15.3216 20.6607 17C19.6915 18.6787 17.6891 19.3883 15.9205 18.791C15.5532 20.6212 13.9378 22 11.9996 22C10.0614 21.9998 8.44581 20.6211 8.07866 18.791C6.3102 19.3878 4.30845 18.6784 3.33941 17C2.37058 15.3218 2.7562 13.2332 4.15679 12C2.75619 10.7668 2.37058 8.67821 3.33941 7C4.3084 5.32165 6.31027 4.6114 8.07866 5.20801C8.44617 3.37839 10.0618 2.0002 11.9996 2Z'
-  const grow = cb(.35, 0, .5, 1), fade = cb(.45, 0, .55, 1)
   defineState('imagining', {
     label: 'Imagining', duration: D,
-    pose(t, T, ctx) {
+    pose(t, T) {
       const b = track(t, [[0, .42, 0, 1, SYM], [.52, 1, 1, 0, SYM]])
       const pitch = -.07 * b, ty = -.45 * b, roll = 1.6 * Math.sin(w * T + .8), yaw = .035 * Math.sin(w * T + 2)
       const P = (x, y, e = 0) => proj(x, y, e, yaw, pitch, roll, 0, ty)
-      // il fiore ha il suo ritmo (3 s di vita, 9 s di rotazione), indipendente dal respiro
-      const abs = ctx.abs ?? T, ph = (abs % 3) / 3
-      const sc = .45 + (1.18 - .45) * grow(ph)
-      const op = ph < .45 ? .16 * fade(ph / .45) : .16 * (1 - fade((ph - .45) / .55))
-      const rot = 360 * ((abs % 9) / 9)
       return {
         el: chain(cL.map(q => P(...q)), 20), er: chain(cR.map(q => P(...q)), 20), no: [P(8, 3), P(8, 9, NOSE_OUT)],
         mo: lineMouth(lerpPts(mr, mi, b).map(q => P(...q))),
-        under: [n('g', { k: 'flower', opacity: op.toFixed(3), transform: `translate(8 8) scale(${sc.toFixed(4)}) rotate(${rot.toFixed(2)}) translate(-8 -8)` },
-          [n('path', { transform: 'translate(.08 .08) scale(.66)', d: FLOWER, fill: 'currentColor' })])],
       }
     },
   })
